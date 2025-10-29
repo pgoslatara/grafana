@@ -47,6 +47,7 @@ reportingCsvEncodingOptions,experimental,@grafana/grafana-operator-experience-sq
 sseGroupByDatasource,experimental,@grafana/grafana-datasources-core-services,false,false,false
 lokiRunQueriesInParallel,privatePreview,@grafana/observability-logs,false,false,false
 externalServiceAccounts,preview,@grafana/identity-access-team,false,false,false
+createAlertRuleFromPanel,experimental,@grafana/alerting-squad,false,false,false
 enableNativeHTTPHistogram,experimental,@grafana/grafana-backend-services-squad,false,true,false
 disableClassicHTTPHistogram,experimental,@grafana/grafana-backend-services-squad,false,true,false
 kubernetesSnapshots,experimental,@grafana/grafana-app-platform-squad,false,true,false

@@ -223,6 +223,10 @@ export interface FeatureToggles {
   */
   externalServiceAccounts?: boolean;
   /**
+  * Enables creating alert rules from a panel using a drawer UI
+  */
+  createAlertRuleFromPanel?: boolean;
+  /**
   * Enables native HTTP Histograms
   */
   enableNativeHTTPHistogram?: boolean;
@@ -813,10 +817,6 @@ export interface FeatureToggles {
   * Enables less memory intensive Elasticsearch result parsing
   */
   elasticsearchImprovedParsing?: boolean;
-  /**
-   * Enables creating alert rules from a panel using a drawer UI
-   */
-  createAlertRuleFromPanel?: boolean;
   /**
   * Shows defined connections for a data source in the plugins detail page
   */
