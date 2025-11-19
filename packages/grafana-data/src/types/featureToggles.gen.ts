@@ -223,10 +223,6 @@ export interface FeatureToggles {
   */
   externalServiceAccounts?: boolean;
   /**
-  * Enables creating alert rules from a panel using a drawer UI
-  */
-  createAlertRuleFromPanel?: boolean;
-  /**
   * Enables native HTTP Histograms
   */
   enableNativeHTTPHistogram?: boolean;
@@ -335,6 +331,10 @@ export interface FeatureToggles {
   * Enables the UI to use rules backend-side filters 100% compatible with the frontend filters
   */
   alertingUIUseFullyCompatBackendFilters?: boolean;
+  /**
+  * Enables creating alert rules from a panel using a drawer UI
+  */
+  createAlertRuleFromPanel?: boolean;
   /**
   * Enable Grafana to have a remote Alertmanager instance as the primary Alertmanager.
   */
