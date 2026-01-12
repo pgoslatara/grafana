@@ -123,8 +123,9 @@ type APIBuilder struct {
 	extras       []Extra
 	extraWorkers []jobs.Worker
 
-	restConfigGetter func(context.Context) (*clientrest.Config, error)
-	registry         prometheus.Registerer
+	restConfigGetter        func(context.Context) (*clientrest.Config, error)
+	registry                prometheus.Registerer
+	namespaceLimitsProvider NamespaceLimitsProvider
 }
 
 // NewAPIBuilder creates an API builder.
@@ -151,6 +152,7 @@ func NewAPIBuilder(
 	registry prometheus.Registerer,
 	newStandaloneClientFactoryFunc func(loopbackConfigProvider apiserver.RestConfigProvider) resources.ClientFactory, // optional, only used for standalone apiserver
 	useExclusivelyAccessCheckerForAuthz bool,
+	namespaceLimitsProvider NamespaceLimitsProvider,
 ) *APIBuilder {
 	var clients resources.ClientFactory
 	if newStandaloneClientFactoryFunc != nil {
@@ -194,6 +196,7 @@ func NewAPIBuilder(
 		registry:                            registry,
 		validator:                           repository.NewValidator(minSyncInterval, allowedTargets, allowImageRendering),
 		useExclusivelyAccessCheckerForAuthz: useExclusivelyAccessCheckerForAuthz,
+		namespaceLimitsProvider:             namespaceLimitsProvider,
 	}
 
 	for _, builder := range extraBuilders {
@@ -268,6 +271,7 @@ func RegisterAPIService(
 		allowedTargets = append(allowedTargets, provisioning.SyncTargetType(target))
 	}
 
+	limitsProvider := NewFixedNamespaceLimitsProvider(10)
 	builder := NewAPIBuilder(
 		cfg.DisableControllers,
 		repoFactory,
@@ -288,6 +292,7 @@ func RegisterAPIService(
 		reg,
 		nil,
 		false, // TODO: first, test this on the MT side before we enable it by default in ST as well
+		limitsProvider,
 	)
 	apiregistration.RegisterAPI(builder)
 	return builder, nil
@@ -801,7 +806,7 @@ func invalidRepositoryError(name string, list field.ErrorList) error {
 }
 
 func (b *APIBuilder) VerifyAgainstExistingRepositories(ctx context.Context, cfg *provisioning.Repository) *field.Error {
-	return VerifyAgainstExistingRepositories(ctx, b.store, cfg)
+	return VerifyAgainstExistingRepositories(ctx, b.store, cfg, b.namespaceLimitsProvider)
 }
 
 func (b *APIBuilder) GetPostStartHooks() (map[string]genericapiserver.PostStartHookFunc, error) {

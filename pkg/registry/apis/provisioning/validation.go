@@ -20,6 +20,11 @@ type RepositoryLister interface {
 	List(ctx context.Context, options *internalversion.ListOptions) (runtime.Object, error)
 }
 
+// NamespaceLimitsProvider provides repository limits for a given namespace
+type NamespaceLimitsProvider interface {
+	GetMaxRepositories(ctx context.Context, namespace string) (int, error)
+}
+
 // GetRepositoriesInNamespace retrieves all repositories in a given namespace
 func GetRepositoriesInNamespace(ctx context.Context, store RepositoryLister) ([]provisioning.Repository, error) {
 	var allRepositories []provisioning.Repository
@@ -51,7 +56,7 @@ func GetRepositoriesInNamespace(ctx context.Context, store RepositoryLister) ([]
 }
 
 // VerifyAgainstExistingRepositories validates a repository configuration against existing repositories
-func VerifyAgainstExistingRepositories(ctx context.Context, store RepositoryLister, cfg *provisioning.Repository) *field.Error {
+func VerifyAgainstExistingRepositories(ctx context.Context, store RepositoryLister, cfg *provisioning.Repository, limitsProvider NamespaceLimitsProvider) *field.Error {
 	ctx, _, err := identity.WithProvisioningIdentity(ctx, cfg.Namespace)
 	if err != nil {
 		return &field.Error{Type: field.ErrorTypeInternal, Detail: err.Error()}
@@ -115,10 +120,31 @@ func VerifyAgainstExistingRepositories(ctx context.Context, store RepositoryList
 			count++
 		}
 	}
-	if count >= 10 {
+
+	maxRepositories, err := limitsProvider.GetMaxRepositories(ctx, cfg.Namespace)
+	if err != nil {
+		return &field.Error{Type: field.ErrorTypeInternal, Detail: fmt.Sprintf("Failed to get repository limit: %v", err)}
+	}
+
+	if count >= maxRepositories {
 		return field.Forbidden(field.NewPath("spec"),
-			"Maximum number of 10 repositories reached")
+			fmt.Sprintf("Maximum number of %d repositories reached", maxRepositories))
 	}
 
 	return nil
+}
+
+// FixedNamespaceLimitsProvider returns a fixed limit for all namespaces
+type FixedNamespaceLimitsProvider struct {
+	limit int
+}
+
+// NewFixedNamespaceLimitsProvider creates a new FixedNamespaceLimitsProvider with the specified limit
+func NewFixedNamespaceLimitsProvider(limit int) *FixedNamespaceLimitsProvider {
+	return &FixedNamespaceLimitsProvider{limit: limit}
+}
+
+// GetMaxRepositories returns the fixed limit for any namespace
+func (f *FixedNamespaceLimitsProvider) GetMaxRepositories(ctx context.Context, namespace string) (int, error) {
+	return f.limit, nil
 }
