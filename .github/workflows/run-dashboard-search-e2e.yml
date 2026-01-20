@@ -25,7 +25,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Pin Go version to mod file
@@ -40,7 +40,7 @@ jobs:
           cache: 'yarn'
       - name: Cache Node Modules
         id: cache-node-modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -56,7 +56,7 @@ jobs:
           runTests: false
       - name: Cache Grafana Build and Dependencies
         id: cache-grafana
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             bin/
@@ -96,11 +96,11 @@ jobs:
 
       steps:
         - name: Checkout repository
-          uses: actions/checkout@v5
+          uses: actions/checkout@v6
           with:
             persist-credentials: false
         - name: Restore Cached Node Modules
-          uses: actions/cache@v4
+          uses: actions/cache@v5
           with:
             path: |
               node_modules
@@ -108,7 +108,7 @@ jobs:
             key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
         - name: Restore Cached Grafana Build and Dependencies
-          uses: actions/cache@v4
+          uses: actions/cache@v5
           with:
             path: |
               bin/

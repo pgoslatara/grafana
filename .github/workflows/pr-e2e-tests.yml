@@ -30,7 +30,7 @@ jobs:
       changed: ${{ steps.detect-changes.outputs.e2e }}
       cloud_plugins_changed: ${{ steps.detect-changes.outputs.e2e-cloud-plugins }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: true # required to get more history in the changed-files action
           fetch-depth: 2
@@ -48,14 +48,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       # TODO: add a cleanup workflow to remove the cache when the PR is closed
       # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#force-deletion-of-caches-overriding-default-cache-eviction-policy
       # TODO: maybe we could just use the cache to store the build, instead of uploading as an artifact?
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         id: cache
         with:
           key: "build-grafana-${{ runner.os }}-${{ hashFiles('yarn.lock', 'public/*',  'packages/*', 'conf/*', 'pkg/**/*.go', '**/go.mod', '**/go.sum', '!**_test.go', '!**.test.ts', '!**.test.tsx', 'Dockerfile') }}"
@@ -94,14 +94,14 @@ jobs:
         id: artifact
 
       - name: Upload grafana.tar.gz
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           retention-days: 1
           name: grafana-tar-gz
           path: build-dir/grafana.tar.gz
 
       - name: Upload grafana docker tarball
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           retention-days: 1
           name: grafana-docker-tar-gz
@@ -118,7 +118,7 @@ jobs:
     outputs:
       artifact: ${{ steps.artifact.outputs.artifact }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Setup Go
@@ -133,7 +133,7 @@ jobs:
           # We want a static binary, so we need to set CGO_ENABLED=0
           CGO_ENABLED=0 go build -o ./e2e-runner ./e2e/
           echo "artifact=e2e-runner-${{github.run_number}}" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         id: upload
         with:
           retention-days: 1
@@ -218,7 +218,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v6
@@ -245,7 +245,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "suite=$(echo "$SUITE" | sed 's/\//-/g')" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: success() || failure()
         with:
           name: ${{ steps.set-suite-name.outputs.suite }}-${{ github.run_number }}
@@ -262,7 +262,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -295,7 +295,7 @@ jobs:
         shardTotal: [8]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v6
@@ -307,7 +307,7 @@ jobs:
           version: 0.18.8
           verb: run
           args: go run ./pkg/build/e2e-playwright --package=grafana.tar.gz --shard=${{ matrix.shard }}/${{ matrix.shardTotal }} --blob-dir=./blob-report
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: success() || failure()
         with:
           name: playwright-blob-${{ github.run_number }}-${{ matrix.shard }}
@@ -324,7 +324,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -391,7 +391,7 @@ jobs:
     name: All Playwright tests complete
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -439,7 +439,7 @@ jobs:
 
       - name: Upload HTML report
         id: upload-html
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-html-${{ github.run_number }}
           path: playwright-report
@@ -476,7 +476,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v6
@@ -498,7 +498,7 @@ jobs:
           args: go run ./pkg/build/a11y --package=grafana.tar.gz --no-threshold-fail --results=./pa11y-ci-results.json
       - name: Upload pa11y results
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           retention-days: 1
           name: pa11y-ci-results
@@ -521,7 +521,7 @@ jobs:
           repo_secrets: |
             GRAFANA_MISC_STATS_API_KEY=grafana-misc-stats:api_key
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Setup Node.js
@@ -556,7 +556,7 @@ jobs:
     name: All E2E tests complete
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
